@@ -47,6 +47,64 @@
             font-size: 1.2em;
         }
 
+        .total-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 40px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .total-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .total-number {
+            font-size: 5em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #e74c3c, #3498db, #27ae60, #9b59b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .total-label {
+            font-size: 1.6em;
+            color: #444;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+
+        .total-subtitle {
+            color: #666;
+            font-size: 1.1em;
+            margin-top: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -206,6 +264,14 @@
             .stat-number {
                 font-size: 2.5em;
             }
+
+            .total-number {
+                font-size: 4em;
+            }
+
+            .total-label {
+                font-size: 1.3em;
+            }
         }
 
         .animal-icon {
@@ -228,6 +294,12 @@
         <div class="header fade-in">
             <h1>🐍 ANIMAIS RESGATADOS ENTRE OS DIAS 18 E 24 PELA COPPA</h1>
             <p>Período: 18 a 24/06/2025 | Região Metropolitana de Salvador</p>
+        </div>
+
+        <div class="total-card fade-in">
+            <div class="total-number" id="total-count">0</div>
+            <div class="total-label">TOTAL DE ANIMAIS RESGATADOS</div>
+            <div class="total-subtitle">7 dias de operação</div>
         </div>
 
         <div class="stats-grid">
@@ -313,6 +385,9 @@
             { animal: 'serpente', date: '24/06/2025', time: '23:59', location: 'Salvador - Pituba' }
         ];
 
+        // Calcular total
+        const totalAnimals = rescueData.length;
+
         // Função para animar contadores
         function animateCounter(elementId, targetValue) {
             const element = document.getElementById(elementId);
@@ -338,6 +413,7 @@
 
         // Animar contadores
         setTimeout(() => {
+            animateCounter('total-count', totalAnimals);
             animateCounter('serpente-count', animalCounts.serpente || 0);
             animateCounter('ave-count', animalCounts.ave || 0);
             animateCounter('iguana-count', animalCounts.iguana || 0);
