@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANIMAIS RESGATADOS ENTRE OS DIAS 18 E 24 PELA COPPA</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #023f0f 0%, #129462 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-number {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .serpente { color: #e74c3c; }
+        .ave { color: #3498db; }
+        .iguana { color: #27ae60; }
+        .sariguê { color: #9b59b6; }
+
+        .stat-label {
+            font-size: 1.2em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .chart-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .chart-title {
+            font-size: 1.4em;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #444;
+            font-weight: 600;
+        }
+
+        .timeline-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .timeline {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .timeline-time {
+            font-weight: bold;
+            margin-right: 15px;
+            min-width: 100px;
+            color: #666;
+        }
+
+        .timeline-content {
+            flex: 1;
+        }
+
+        .timeline-animal {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .timeline-location {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .location-stats {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .location-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .location-item:last-child {
+            border-bottom: none;
+        }
+
+        .location-count {
+            background: #3498db;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .stat-number {
+                font-size: 2.5em;
+            }
+        }
+
+        .animal-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header fade-in">
+            <h1>🐍 ANIMAIS RESGATADOS ENTRE OS DIAS 18 E 24 PELA COPPA</h1>
+            <p>Período: 18 a 24/06/2025 | Região Metropolitana de Salvador</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card fade-in">
+                <div class="animal-icon">🐍</div>
+                <div class="stat-number serpente" id="serpente-count">0</div>
+                <div class="stat-label">Serpentes</div>
+            </div>
+            <div class="stat-card fade-in">
+                <div class="animal-icon">🦅</div>
+                <div class="stat-number ave" id="ave-count">0</div>
+                <div class="stat-label">Aves</div>
+            </div>
+            <div class="stat-card fade-in">
+                <div class="animal-icon">🦎</div>
+                <div class="stat-number iguana" id="iguana-count">0</div>
+                <div class="stat-label">Iguanas</div>
+            </div>
+            <div class="stat-card fade-in">
+                <div class="animal-icon">🐀</div>
+                <div class="stat-number sariguê" id="sariguê-count">0</div>
+                <div class="stat-label">Sariguês</div>
+            </div>
+        </div>
+
+        <div class="charts-container">
+            <div class="chart-card">
+                <div class="chart-title">Distribuição por Tipo de Animal</div>
+                <canvas id="animalChart" width="400" height="300"></canvas>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Resgates por Dia</div>
+                <canvas id="dailyChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+
+        <div class="charts-container">
+            <div class="location-stats">
+                <div class="chart-title">Resgates por Cidade</div>
+                <div id="city-list"></div>
+                <div class="chart-title" style="margin-top: 30px;">Bairros de Salvador</div>
+                <div id="salvador-neighborhoods"></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Resgates por Horário</div>
+                <canvas id="timeChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+
+        <div class="timeline-container">
+            <div class="chart-title">Linha do Tempo dos Resgates</div>
+            <div class="timeline" id="timeline"></div>
+        </div>
+    </div>
+
+    <script>
+        // Dados dos resgates
+        const rescueData = [
+            { animal: 'serpente', date: '18/06/2025', time: '09:50', location: 'Lauro de Freitas' },
+            { animal: 'serpente', date: '18/06/2025', time: '11:30', location: 'Simões Filho' },
+            { animal: 'ave', date: '18/06/2025', time: '16:20', location: 'Salvador - Colinas de Pituaçu', species: 'rolinha' },
+            { animal: 'serpente', date: '18/06/2025', time: '17:45', location: 'Salvador - Praia do Flamengo' },
+            { animal: 'serpente', date: '18/06/2025', time: '19:00', location: 'Salvador - Paralela' },
+            { animal: 'serpente', date: '18/06/2025', time: '22:00', location: 'Salvador - São Cristóvão' },
+            { animal: 'serpente', date: '18/06/2025', time: '22:20', location: 'Salvador - Praia do Flamengo' },
+            { animal: 'ave', date: '19/06/2025', time: '11:20', location: 'Salvador - Pituba', species: 'carcará' },
+            { animal: 'serpente', date: '19/06/2025', time: '15:00', location: 'Salvador - Av. ACM' },
+            { animal: 'iguana', date: '19/06/2025', time: '17:16', location: 'Salvador - Av. Marques de Caravelas' },
+            { animal: 'iguana', date: '19/06/2025', time: '18:00', location: 'Salvador - Narandiba' },
+            { animal: 'ave', date: '20/06/2025', time: '08:50', location: 'Salvador - Cabula IV', species: 'coruja' },
+            { animal: 'serpente', date: '20/06/2025', time: '11:40', location: 'Camaçari - Arembepe' },
+            { animal: 'ave', date: '21/06/2025', time: '15:20', location: 'Salvador - Pituaçu', species: 'passeriforme' },
+            { animal: 'serpente', date: '21/06/2025', time: '15:40', location: 'Camaçari - Abrantes' },
+            { animal: 'iguana', date: '22/06/2025', time: '10:09', location: 'Salvador - Stella Maris' },
+            { animal: 'serpente', date: '22/06/2025', time: '16:45', location: 'Salvador - Boca do Rio' },
+            { animal: 'serpente', date: '22/06/2025', time: '19:00', location: 'Salvador - Piatã' },
+            { animal: 'ave', date: '23/06/2025', time: '10:30', location: 'Salvador - Av. Ulysses Guimarães', species: 'coruja' },
+            { animal: 'serpente', date: '23/06/2025', time: '11:20', location: 'Simões Filho' },
+            { animal: 'serpente', date: '24/06/2025', time: '02:00', location: 'Salvador - Luiz Anselmo' },
+            { animal: 'serpente', date: '24/06/2025', time: '02:40', location: 'Lauro de Freitas' },
+            { animal: 'serpente', date: '24/06/2025', time: '20:50', location: 'Salvador - Alphaville' },
+            { animal: 'sariguê', date: '24/06/2025', time: '23:05', location: 'Salvador - Vitória' },
+            { animal: 'serpente', date: '24/06/2025', time: '23:59', location: 'Salvador - Pituba' }
+        ];
+
+        // Função para animar contadores
+        function animateCounter(elementId, targetValue) {
+            const element = document.getElementById(elementId);
+            let currentValue = 0;
+            const increment = targetValue / 30;
+            
+            const timer = setInterval(() => {
+                currentValue += increment;
+                if (currentValue >= targetValue) {
+                    element.textContent = targetValue;
+                    clearInterval(timer);
+                } else {
+                    element.textContent = Math.floor(currentValue);
+                }
+            }, 50);
+        }
+
+        // Contar animais por tipo
+        const animalCounts = rescueData.reduce((acc, rescue) => {
+            acc[rescue.animal] = (acc[rescue.animal] || 0) + 1;
+            return acc;
+        }, {});
+
+        // Animar contadores
+        setTimeout(() => {
+            animateCounter('serpente-count', animalCounts.serpente || 0);
+            animateCounter('ave-count', animalCounts.ave || 0);
+            animateCounter('iguana-count', animalCounts.iguana || 0);
+            animateCounter('sariguê-count', animalCounts.sariguê || 0);
+        }, 500);
+
+        // Gráfico de distribuição por animal
+        const animalCtx = document.getElementById('animalChart').getContext('2d');
+        new Chart(animalCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Serpentes', 'Aves', 'Iguanas', 'Sariguês'],
+                datasets: [{
+                    data: [
+                        animalCounts.serpente || 0,
+                        animalCounts.ave || 0,
+                        animalCounts.iguana || 0,
+                        animalCounts.sariguê || 0
+                    ],
+                    backgroundColor: ['#e74c3c', '#3498db', '#27ae60', '#9b59b6'],
+                    borderWidth: 3,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            font: { size: 12 }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico por dia
+        const dailyCounts = rescueData.reduce((acc, rescue) => {
+            const day = rescue.date.split('/')[0];
+            acc[day] = (acc[day] || 0) + 1;
+            return acc;
+        }, {});
+
+        const dailyCtx = document.getElementById('dailyChart').getContext('2d');
+        new Chart(dailyCtx, {
+            type: 'line',
+            data: {
+                labels: Object.keys(dailyCounts).sort(),
+                datasets: [{
+                    label: 'Resgates por dia',
+                    data: Object.keys(dailyCounts).sort().map(day => dailyCounts[day]),
+                    borderColor: '#3498db',
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
+        });
+
+        // Gráfico por horário
+        const hourCounts = rescueData.reduce((acc, rescue) => {
+            const hour = parseInt(rescue.time.split(':')[0]);
+            const period = hour < 6 ? 'Madrugada' :
+                          hour < 12 ? 'Manhã' :
+                          hour < 18 ? 'Tarde' : 'Noite';
+            acc[period] = (acc[period] || 0) + 1;
+            return acc;
+        }, {});
+
+        const timeCtx = document.getElementById('timeChart').getContext('2d');
+        new Chart(timeCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Madrugada', 'Manhã', 'Tarde', 'Noite'],
+                datasets: [{
+                    label: 'Resgates',
+                    data: [
+                        hourCounts['Madrugada'] || 0,
+                        hourCounts['Manhã'] || 0,
+                        hourCounts['Tarde'] || 0,
+                        hourCounts['Noite'] || 0
+                    ],
+                    backgroundColor: ['#2c3e50', '#f39c12', '#e67e22', '#34495e'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
+        });
+
+        // Contagem por cidades
+        const cityCounts = rescueData.reduce((acc, rescue) => {
+            let city;
+            if (rescue.location.includes(' - ')) {
+                city = rescue.location.split(' - ')[0];
+            } else {
+                city = rescue.location;
+            }
+            acc[city] = (acc[city] || 0) + 1;
+            return acc;
+        }, {});
+
+        // Contagem de bairros de Salvador
+        const salvadorNeighborhoods = rescueData
+            .filter(rescue => rescue.location.includes('Salvador - '))
+            .reduce((acc, rescue) => {
+                const neighborhood = rescue.location.split(' - ')[1];
+                acc[neighborhood] = (acc[neighborhood] || 0) + 1;
+                return acc;
+            }, {});
+
+        // Lista de cidades
+        const sortedCities = Object.entries(cityCounts)
+            .sort((a, b) => b[1] - a[1]);
+
+        const cityList = document.getElementById('city-list');
+        sortedCities.forEach(([city, count]) => {
+            const item = document.createElement('div');
+            item.className = 'location-item';
+            item.innerHTML = `
+                <span>${city}</span>
+                <span class="location-count">${count}</span>
+            `;
+            cityList.appendChild(item);
+        });
+
+        // Lista de bairros de Salvador
+        const sortedNeighborhoods = Object.entries(salvadorNeighborhoods)
+            .sort((a, b) => b[1] - a[1]);
+
+        const salvadorList = document.getElementById('salvador-neighborhoods');
+        sortedNeighborhoods.forEach(([neighborhood, count]) => {
+            const item = document.createElement('div');
+            item.className = 'location-item';
+            item.innerHTML = `
+                <span>${neighborhood}</span>
+                <span class="location-count" style="background: #e74c3c;">${count}</span>
+            `;
+            salvadorList.appendChild(item);
+        });
+
+        // Timeline
+        const timeline = document.getElementById('timeline');
+        const colors = {
+            serpente: '#e74c3c',
+            ave: '#3498db',
+            iguana: '#27ae60',
+            sariguê: '#9b59b6'
+        };
+
+        const icons = {
+            serpente: '🐍',
+            ave: '🦅',
+            iguana: '🦎',
+            sariguê: '🐀'
+        };
+
+        rescueData.forEach(rescue => {
+            const item = document.createElement('div');
+            item.className = 'timeline-item';
+            item.style.borderLeftColor = colors[rescue.animal];
+            
+            const species = rescue.species ? ` (${rescue.species})` : '';
+            
+            item.innerHTML = `
+                <div class="timeline-time">${rescue.time}</div>
+                <div class="timeline-content">
+                    <div class="timeline-animal" style="color: ${colors[rescue.animal]}">
+                        ${icons[rescue.animal]} ${rescue.animal.charAt(0).toUpperCase() + rescue.animal.slice(1)}${species}
+                    </div>
+                    <div class="timeline-location">${rescue.location}</div>
+                </div>
+            `;
+            timeline.appendChild(item);
+        });
+
+        // Adicionar animações de entrada
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        });
+
+        document.querySelectorAll('.chart-card, .location-stats, .timeline-container').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
